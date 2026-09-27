@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="Build a workout, calculate volume, and save or export it."
+    >
+
+    <title>Workout Builder</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header>
+
+        <a href="../../" class="back-link">
+            ← more stuff
+        </a>
+
+        <span>
+            your workout stays on this device
+        </span>
+
+    </header>
+
+
+    <main>
+
+        <section class="hero">
+
+            <p class="eyebrow">
+                WORKOUT BUILDER
+            </p>
+
+            <h1>
+                build your workout.
+            </h1>
+
+            <p class="description">
+                Add your exercises, sets, weight,
+                and reps. We'll do the math.
+            </p>
+
+        </section>
+
+
+        <!-- WORKOUT NAME -->
+
+        <section class="workout-name-section">
+
+            <label for="workoutName">
+                WORKOUT NAME
+            </label>
+
+            <input
+                id="workoutName"
+                type="text"
+                maxlength="50"
+                placeholder="Push, Pull, Legs..."
+            >
+
+        </section>
+
+
+        <!-- EXERCISES GET ADDED HERE -->
+
+        <section
+            id="exerciseContainer"
+            class="exercise-container"
+        >
+        </section>
+
+
+        <!-- ADD EXERCISE -->
+
+        <button
+            id="addExerciseButton"
+            class="add-button large-add"
+            type="button"
+        >
+            <span>+</span>
+            ADD WORKOUT
+        </button>
+
+
+        <!-- TOTAL VOLUME -->
+
+        <section class="total-card">
+
+            <div>
+
+                <p>
+                    TOTAL WORKOUT VOLUME
+                </p>
+
+                <span>
+                    weight × reps across all sets
+                </span>
+
+            </div>
+
+            <div class="total-number">
+
+                <strong id="totalVolume">
+                    0
+                </strong>
+
+                <span>
+                    LB
+                </span>
+
+            </div>
+
+        </section>
+
+
+        <!-- ACTIONS -->
+
+        <section class="actions">
+
+            <button
+                id="saveButton"
+                class="save-button"
+                type="button"
+            >
+                SAVE ON THIS DEVICE
+            </button>
+
+            <button
+                id="pdfButton"
+                class="pdf-button"
+                type="button"
+            >
+                DOWNLOAD / PRINT PDF
+            </button>
+
+        </section>
+
+
+        <button
+            id="clearButton"
+            class="clear-button"
+            type="button"
+        >
+            clear workout
+        </button>
+
+
+        <p
+            id="statusMessage"
+            class="status-message"
+        >
+        </p>
+
+    </main>
+
+
+    <footer>
+
+        <span>
+            workout builder
+        </span>
+
+        <a href="../../">
+            more stuff →
+        </a>
+
+    </footer>
+
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>

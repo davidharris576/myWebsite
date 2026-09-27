@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, user-scalable=no"
+    >
+
+    <meta
+        name="description"
+        content="Don't Let Go. Hold the button for as long as you can."
+    >
+
+    <title>Don't Let Go</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <a class="back-link" href="../../">
+        ← More stuff
+    </a>
+
+
+    <main class="game">
+
+        <!-- START / GAME SCREEN -->
+
+        <section id="gameScreen" class="screen">
+
+            <div class="title-area">
+
+                <p class="eyebrow">
+                    HOW LONG CAN YOU LAST?
+                </p>
+
+                <h1>
+                    DON'T LET GO
+                </h1>
+
+            </div>
+
+
+            <div class="timer-area">
+
+                <div id="timer" class="timer">
+                    00:00.000
+                </div>
+
+                <div class="best-time">
+                    PERSONAL BEST
+                    <span id="bestTime">
+                        00:00.000
+                    </span>
+                </div>
+
+            </div>
+
+
+            <div id="arena" class="arena">
+
+                <button
+                    id="holdButton"
+                    class="hold-button"
+                    type="button"
+                >
+                    <span id="buttonText">
+                        HOLD
+                    </span>
+                </button>
+
+
+                <div
+                    id="message"
+                    class="game-message"
+                >
+                    Hold the button to start.
+                </div>
+
+
+                <div
+                    id="fakeWarning"
+                    class="fake-warning hidden"
+                >
+                    ⚠ CONNECTION LOST
+                </div>
+
+
+                <div
+                    id="fakeButton"
+                    class="fake-button hidden"
+                >
+                    LET GO
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- GAME OVER SCREEN -->
+
+        <section
+            id="gameOverScreen"
+            class="screen hidden"
+        >
+
+            <div class="game-over-card">
+
+                <p class="eyebrow">
+                    GAME OVER
+                </p>
+
+                <h2>
+                    YOU LET GO.
+                </h2>
+
+
+                <p class="score-label">
+                    YOU LASTED
+                </p>
+
+                <div
+                    id="finalTime"
+                    class="final-time"
+                >
+                    00:00.000
+                </div>
+
+
+                <div
+                    id="newBest"
+                    class="new-best hidden"
+                >
+                    NEW PERSONAL BEST
+                </div>
+
+
+                <div class="name-section">
+
+                    <label for="playerName">
+                        ARCADE NAME
+                    </label>
+
+                    <div class="name-input-row">
+
+                        <input
+                            id="playerName"
+                            type="text"
+                            maxlength="10"
+                            autocomplete="off"
+                            spellcheck="false"
+                            placeholder="DAVID"
+                        >
+
+                        <span id="characterCount">
+                            0 / 10
+                        </span>
+
+                    </div>
+
+                    <p class="name-help">
+                        10 characters max.
+                        This will eventually appear
+                        on the public leaderboard.
+                    </p>
+
+                </div>
+
+
+                <button
+                    id="submitButton"
+                    class="action-button"
+                    type="button"
+                >
+                    SUBMIT SCORE
+                </button>
+
+
+                <button
+                    id="playAgainButton"
+                    class="secondary-button"
+                    type="button"
+                >
+                    PLAY AGAIN
+                </button>
+
+
+                <p
+                    id="submitMessage"
+                    class="submit-message hidden"
+                >
+                    Leaderboard coming soon.
+                    Your score isn't being uploaded yet.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- LEADERBOARD PREVIEW -->
+
+        <section class="leaderboard-section">
+
+            <div class="leaderboard-header">
+
+                <div>
+
+                    <p class="eyebrow">
+                        LEADERBOARD
+                    </p>
+
+                    <h2>
+                        Survivors
+                    </h2>
+
+                </div>
+
+
+                <div class="leaderboard-tabs">
+
+                    <button
+                        id="weeklyTab"
+                        class="tab active"
+                        type="button"
+                    >
+                        THIS WEEK
+                    </button>
+
+                    <button
+                        id="allTimeTab"
+                        class="tab"
+                        type="button"
+                    >
+                        ALL TIME
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="leaderboard-card">
+
+                <div class="leaderboard-status">
+
+                    <span>
+                        WORLDWIDE LEADERBOARD
+                    </span>
+
+                    <span class="status-dot">
+                        COMING SOON
+                    </span>
+
+                </div>
+
+
+                <div id="leaderboard">
+
+                    <div class="empty-leaderboard">
+
+                        <div class="trophy">
+                            🏆
+                        </div>
+
+                        <h3>
+                            No survivors yet.
+                        </h3>
+
+                        <p>
+                            The worldwide leaderboard
+                            will be connected after the
+                            game is finished.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <footer>
+
+        <span>
+            DON'T LET GO
+        </span>
+
+        <a href="../../">
+            More stuff →
+        </a>
+
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+
+</body>
+
+</html>

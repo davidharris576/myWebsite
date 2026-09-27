@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>What's your time worth?</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <main>
+
+        <div class="calculator">
+
+            <div class="logo">⏱</div>
+
+            <h1>What's your time worth?</h1>
+
+            <p class="subtitle">
+                Find out how many hours of your life that purchase costs.
+            </p>
+
+            <div class="input-group">
+                <label for="wage">How much do you make per hour?</label>
+
+                <div class="input-box">
+                    <span>$</span>
+                    <input
+                        type="number"
+                        id="wage"
+                        placeholder="15.00"
+                        min="0"
+                        step="0.01"
+                    >
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="price">How much does it cost?</label>
+
+                <div class="input-box">
+                    <span>$</span>
+                    <input
+                        type="number"
+                        id="price"
+                        placeholder="250.00"
+                        min="0"
+                        step="0.01"
+                    >
+                </div>
+            </div>
+
+            <button id="calculateButton">
+                How much work is that?
+            </button>
+
+            <div id="result" class="result hidden">
+
+                <p class="result-label">
+                    That costs you
+                </p>
+
+                <div id="hoursResult" class="hours-result">
+                    0 hours
+                </div>
+
+                <p class="result-bottom">
+                    of work.
+                </p>
+
+                <p id="funResult" class="fun-result"></p>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <footer>
+        <div class="ad-placeholder">
+            Advertisement
+        </div>
+
+        <p>What's your time worth?</p>
+    </footer>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
