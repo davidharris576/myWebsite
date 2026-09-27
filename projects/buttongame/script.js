@@ -9,6 +9,8 @@ const supabaseClient =
         SUPABASE_URL,
         SUPABASE_KEY
     );
+
+
 const holdButton =
     document.getElementById("holdButton");
 
@@ -66,6 +68,9 @@ const weeklyTab =
 const allTimeTab =
     document.getElementById("allTimeTab");
 
+const leaderboard =
+    document.getElementById("leaderboard");
+
 
 let playing = false;
 
@@ -100,14 +105,6 @@ bestTime.textContent =
 
 /*
     FORMAT MILLISECONDS
-
-    Example:
-
-    222681
-
-    becomes:
-
-    03:42.681
 */
 
 function formatTime(milliseconds) {
@@ -141,6 +138,114 @@ function formatTime(milliseconds) {
 
 
 /*
+    GET START OF THIS WEEK
+
+    Week starts Monday at midnight
+    in the visitor's local timezone.
+*/
+
+function getStartOfWeek() {
+
+    const now =
+        new Date();
+
+    const startOfWeek =
+        new Date(now);
+
+    const day =
+        now.getDay();
+
+    const daysSinceMonday =
+        day === 0
+            ? 6
+            : day - 1;
+
+
+    startOfWeek.setDate(
+        now.getDate() - daysSinceMonday
+    );
+
+
+    startOfWeek.setHours(
+        0,
+        0,
+        0,
+        0
+    );
+
+
+    return startOfWeek;
+
+}
+
+
+/*
+    CHECK WEEKLY QUALIFICATION
+*/
+
+async function qualifiesForWeeklyLeaderboard(score) {
+
+    const startOfWeek =
+        getStartOfWeek();
+
+
+    const { data, error } =
+        await supabaseClient
+            .from("scores")
+            .select("time_ms")
+            .gte(
+                "created_at",
+                startOfWeek.toISOString()
+            )
+            .order(
+                "time_ms",
+                {
+                    ascending: false
+                }
+            )
+            .limit(10);
+
+
+    if (error) {
+
+        console.error(error);
+
+        /*
+            If Supabase has a temporary
+            problem, still let the player
+            enter a name rather than
+            blocking the score.
+        */
+
+        return true;
+
+    }
+
+
+    /*
+        If there are fewer than 10 scores,
+        there is automatically room.
+    */
+
+    if (data.length < 10) {
+
+        return true;
+
+    }
+
+
+    /*
+        data[9] is the current #10 score.
+
+        The new score must BEAT it.
+    */
+
+    return score > data[9].time_ms;
+
+}
+
+
+/*
     START GAME
 */
 
@@ -150,7 +255,9 @@ function startGame(event) {
 
 
     if (playing) {
+
         return;
+
     }
 
 
@@ -214,7 +321,9 @@ function startGame(event) {
 function updateTimer() {
 
     if (!playing) {
+
         return;
+
     }
 
 
@@ -240,15 +349,19 @@ function updateTimer() {
     END GAME
 */
 
-function endGame(event) {
+async function endGame(event) {
 
     if (event) {
+
         event.preventDefault();
+
     }
 
 
     if (!playing) {
+
         return;
+
     }
 
 
@@ -334,16 +447,211 @@ function endGame(event) {
     );
 
 
+    /*
+        CHECK IF SCORE MADE
+        THIS WEEK'S TOP 10
+    */
+
+    const qualified =
+        await qualifiesForWeeklyLeaderboard(
+            Math.floor(elapsedTime)
+        );
+
+
+    if (qualified) {
+
+        showScoreEntry();
+
+    } else {
+
+        await showFailedLeaderboard();
+
+    }
+
+}
+
+
+/*
+    SHOW NAME ENTRY
+*/
+
+function showScoreEntry() {
+
+    const failedBoard =
+        document.getElementById(
+            "failedLeaderboard"
+        );
+
+
+    if (failedBoard) {
+
+        failedBoard.remove();
+
+    }
+
+
+    document
+        .querySelector(".name-section")
+        .classList.remove(
+            "hidden"
+        );
+
+
+    submitButton.classList.remove(
+        "hidden"
+    );
+
+
+    submitButton.disabled = false;
+
+    submitButton.textContent =
+        "SUBMIT SCORE";
+
+
+    playAgainButton.classList.remove(
+        "hidden"
+    );
+
+
+    submitMessage.classList.add(
+        "hidden"
+    );
+
+
+    playerName.value = "";
+
+    characterCount.textContent =
+        "0 / 10";
+
+
     playerName.focus();
 
 }
 
 
 /*
-    DIFFICULTY
+    SHOW WEEKLY LEADERBOARD
+    WHEN PLAYER DOES NOT QUALIFY
+*/
 
-    Every second this checks how long
-    the player has survived.
+async function showFailedLeaderboard() {
+
+    document
+        .querySelector(".name-section")
+        .classList.add(
+            "hidden"
+        );
+
+
+    submitButton.classList.add(
+        "hidden"
+    );
+
+
+    submitMessage.classList.add(
+        "hidden"
+    );
+
+
+    const startOfWeek =
+        getStartOfWeek();
+
+
+    const { data, error } =
+        await supabaseClient
+            .from("scores")
+            .select(
+                "name, time_ms"
+            )
+            .gte(
+                "created_at",
+                startOfWeek.toISOString()
+            )
+            .order(
+                "time_ms",
+                {
+                    ascending: false
+                }
+            )
+            .limit(10);
+
+
+    if (error) {
+
+        console.error(error);
+
+        return;
+
+    }
+
+
+    let failedBoard =
+        document.getElementById(
+            "failedLeaderboard"
+        );
+
+
+    if (!failedBoard) {
+
+        failedBoard =
+            document.createElement(
+                "div"
+            );
+
+
+        failedBoard.id =
+            "failedLeaderboard";
+
+
+        playAgainButton.before(
+            failedBoard
+        );
+
+    }
+
+
+    failedBoard.innerHTML = `
+        <p class="eyebrow">
+            THIS WEEK'S LEADERBOARD
+        </p>
+
+        <div class="failed-leaderboard">
+
+            ${
+                data.map(
+                    (score, index) => `
+                        <div class="leaderboard-row">
+
+                            <span class="rank">
+                                ${index + 1}
+                            </span>
+
+                            <span class="leaderboard-name">
+                                ${escapeHTML(score.name)}
+                            </span>
+
+                            <span class="leaderboard-time">
+                                ${formatTime(score.time_ms)}
+                            </span>
+
+                        </div>
+                    `
+                ).join("")
+            }
+
+        </div>
+    `;
+
+
+    playAgainButton.classList.remove(
+        "hidden"
+    );
+
+}
+
+
+/*
+    DIFFICULTY
 */
 
 function updateDifficulty() {
@@ -354,8 +662,6 @@ function updateDifficulty() {
 
     /*
         10 SECONDS
-
-        Change message.
     */
 
     if (
@@ -374,8 +680,6 @@ function updateDifficulty() {
 
     /*
         20 SECONDS
-
-        Slightly shrink button.
     */
 
     if (
@@ -400,8 +704,6 @@ function updateDifficulty() {
 
     /*
         30 SECONDS
-
-        Fake warning.
     */
 
     if (
@@ -424,8 +726,6 @@ function updateDifficulty() {
 
     /*
         40 SECONDS
-
-        Fake button.
     */
 
     if (
@@ -448,8 +748,6 @@ function updateDifficulty() {
 
     /*
         50 SECONDS
-
-        Shake arena.
     */
 
     if (
@@ -469,9 +767,6 @@ function updateDifficulty() {
 
     /*
         60 SECONDS
-
-        Stop shaking.
-        Move button slightly.
     */
 
     if (
@@ -513,9 +808,6 @@ function updateDifficulty() {
 
 /*
     MOVE BUTTON
-
-    Movement is intentionally limited
-    so it stays inside the arena.
 */
 
 function moveButton() {
@@ -605,7 +897,9 @@ document.addEventListener(
     () => {
 
         if (playing) {
+
             endGame();
+
         }
 
     }
@@ -630,7 +924,9 @@ document.addEventListener(
     () => {
 
         if (playing) {
+
             endGame();
+
         }
 
     },
@@ -642,8 +938,6 @@ document.addEventListener(
 
 /*
     PREVENT CONTEXT MENU
-
-    Useful when holding on mobile.
 */
 
 holdButton.addEventListener(
@@ -675,15 +969,15 @@ playerName.addEventListener(
 
         let cleaned =
             playerName.value
-            .toUpperCase()
-            .replace(
-                /[^A-Z0-9_-]/g,
-                ""
-            )
-            .slice(
-                0,
-                10
-            );
+                .toUpperCase()
+                .replace(
+                    /[^A-Z0-9_-]/g,
+                    ""
+                )
+                .slice(
+                    0,
+                    10
+                );
 
 
         playerName.value =
@@ -730,7 +1024,10 @@ submitButton.addEventListener(
                 .insert([
                     {
                         name: name,
-                        time_ms: Math.floor(elapsedTime)
+                        time_ms:
+                            Math.floor(
+                                elapsedTime
+                            )
                     }
                 ]);
 
@@ -739,17 +1036,21 @@ submitButton.addEventListener(
 
             console.error(error);
 
+
             submitMessage.textContent =
                 "Couldn't submit score. Try again.";
+
 
             submitMessage.classList.remove(
                 "hidden"
             );
 
+
             submitButton.disabled = false;
 
             submitButton.textContent =
                 "SUBMIT SCORE";
+
 
             return;
 
@@ -759,6 +1060,7 @@ submitButton.addEventListener(
         submitMessage.textContent =
             "SCORE SUBMITTED.";
 
+
         submitMessage.classList.remove(
             "hidden"
         );
@@ -766,35 +1068,14 @@ submitButton.addEventListener(
 
         submitButton.textContent =
             "SUBMITTED";
-        
+
+
         await loadLeaderboard(
-            weeklyTab.classList.contains("active")
+            weeklyTab.classList.contains(
+                "active"
+            )
                 ? "weekly"
                 : "allTime"
-);
-
-    }
-);
-
-submitButton.addEventListener(
-    "click",
-    () => {
-
-        const name =
-            playerName.value.trim();
-
-
-        if (!name) {
-
-            playerName.focus();
-
-            return;
-
-        }
-
-
-        submitMessage.classList.remove(
-            "hidden"
         );
 
     }
@@ -848,6 +1129,58 @@ playAgainButton.addEventListener(
 
         resetButton();
 
+
+        /*
+            REMOVE THE SMALL LEADERBOARD
+            FROM A FAILED ATTEMPT
+        */
+
+        const failedBoard =
+            document.getElementById(
+                "failedLeaderboard"
+            );
+
+
+        if (failedBoard) {
+
+            failedBoard.remove();
+
+        }
+
+
+        /*
+            RESTORE SCORE ENTRY
+            FOR THE NEXT ATTEMPT
+        */
+
+        document
+            .querySelector(".name-section")
+            .classList.remove(
+                "hidden"
+            );
+
+
+        submitButton.classList.remove(
+            "hidden"
+        );
+
+
+        submitButton.disabled = false;
+
+        submitButton.textContent =
+            "SUBMIT SCORE";
+
+
+        submitMessage.classList.add(
+            "hidden"
+        );
+
+
+        playerName.value = "";
+
+        characterCount.textContent =
+            "0 / 10";
+
     }
 );
 
@@ -856,11 +1189,9 @@ playAgainButton.addEventListener(
     LEADERBOARD
 */
 
-const leaderboard =
-    document.getElementById("leaderboard");
-
-
-async function loadLeaderboard(type = "weekly") {
+async function loadLeaderboard(
+    type = "weekly"
+) {
 
     leaderboard.innerHTML =
         `<div class="empty-leaderboard">
@@ -871,36 +1202,21 @@ async function loadLeaderboard(type = "weekly") {
     let query =
         supabaseClient
             .from("scores")
-            .select("name, time_ms, created_at")
-            .order("time_ms", {
-                ascending: false
-            });
+            .select(
+                "name, time_ms, created_at"
+            )
+            .order(
+                "time_ms",
+                {
+                    ascending: false
+                }
+            );
 
 
     if (type === "weekly") {
 
-        const now =
-            new Date();
-
         const startOfWeek =
-            new Date(now);
-
-        const day =
-            now.getDay();
-
-        const daysSinceMonday =
-            day === 0 ? 6 : day - 1;
-
-        startOfWeek.setDate(
-            now.getDate() - daysSinceMonday
-        );
-
-        startOfWeek.setHours(
-            0,
-            0,
-            0,
-            0
-        );
+            getStartOfWeek();
 
 
         query =
@@ -927,10 +1243,12 @@ async function loadLeaderboard(type = "weekly") {
 
         console.error(error);
 
+
         leaderboard.innerHTML =
             `<div class="empty-leaderboard">
                 <p>Couldn't load scores.</p>
             </div>`;
+
 
         return;
 
@@ -942,16 +1260,31 @@ async function loadLeaderboard(type = "weekly") {
 }
 
 
+/*
+    DISPLAY LEADERBOARD
+*/
+
 function displayLeaderboard(scores) {
 
     if (!scores.length) {
 
         leaderboard.innerHTML =
             `<div class="empty-leaderboard">
-                <div class="trophy">🏆</div>
-                <h3>No survivors yet.</h3>
-                <p>Be the first on the leaderboard.</p>
+
+                <div class="trophy">
+                    🏆
+                </div>
+
+                <h3>
+                    No survivors yet.
+                </h3>
+
+                <p>
+                    Be the first on the leaderboard.
+                </p>
+
             </div>`;
+
 
         return;
 
@@ -988,56 +1321,30 @@ function displayLeaderboard(scores) {
 }
 
 
+/*
+    ESCAPE PLAYER NAMES
+*/
+
 function escapeHTML(text) {
 
     const div =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
+
 
     div.textContent =
         text;
+
 
     return div.innerHTML;
 
 }
 
 
-weeklyTab.addEventListener(
-    "click",
-    () => {
-
-        weeklyTab.classList.add(
-            "active"
-        );
-
-        allTimeTab.classList.remove(
-            "active"
-        );
-
-        loadLeaderboard("weekly");
-
-    }
-);
-
-
-allTimeTab.addEventListener(
-    "click",
-    () => {
-
-        allTimeTab.classList.add(
-            "active"
-        );
-
-        weeklyTab.classList.remove(
-            "active"
-        );
-
-        loadLeaderboard("allTime");
-
-    }
-);
-
-
-loadLeaderboard("weekly");
+/*
+    LEADERBOARD TABS
+*/
 
 weeklyTab.addEventListener(
     "click",
@@ -1050,6 +1357,11 @@ weeklyTab.addEventListener(
 
         allTimeTab.classList.remove(
             "active"
+        );
+
+
+        loadLeaderboard(
+            "weekly"
         );
 
     }
@@ -1069,5 +1381,20 @@ allTimeTab.addEventListener(
             "active"
         );
 
+
+        loadLeaderboard(
+            "allTime"
+        );
+
     }
+);
+
+
+/*
+    LOAD WEEKLY LEADERBOARD
+    WHEN PAGE OPENS
+*/
+
+loadLeaderboard(
+    "weekly"
 );
