@@ -990,6 +990,61 @@ playerName.addEventListener(
     }
 );
 
+/*
+    NAME FILTER
+*/
+
+function isNameAllowed(name) {
+
+    let cleaned =
+        name
+            .toLowerCase()
+            .replace(/0/g, "o")
+            .replace(/1/g, "i")
+            .replace(/3/g, "e")
+            .replace(/4/g, "a")
+            .replace(/5/g, "s")
+            .replace(/7/g, "t")
+            .replace(/@/g, "a")
+            .replace(/\$/g, "s")
+            .replace(/[^a-z]/g, "");
+
+
+    const blockedWords = [
+
+        // Basic profanity
+        "fuck",
+        "fucker",
+        "fucking",
+        "shit",
+        "bitch",
+        "bastard",
+        "asshole",
+        "dick",
+        "cunt",
+        "pussy",
+
+        // Common racial / ethnic slurs
+        "nigger",
+        "nigga",
+        "chink",
+        "spic",
+        "kike",
+        "wetback",
+
+        // Common anti-LGBTQ slurs
+        "faggot",
+        "fag",
+        "tranny"
+
+    ];
+
+
+    return !blockedWords.some(
+        word => cleaned.includes(word)
+    );
+
+}
 
 /*
     SUBMIT SCORE
@@ -1011,6 +1066,20 @@ submitButton.addEventListener(
 
         }
 
+if (!isNameAllowed(name)) {
+
+    submitMessage.textContent =
+        "THAT NAME ISN'T ALLOWED.";
+
+    submitMessage.classList.remove(
+        "hidden"
+    );
+
+    playerName.focus();
+
+    return;
+
+}
 
         submitButton.disabled = true;
 
